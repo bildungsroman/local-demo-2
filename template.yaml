@@ -25,6 +25,13 @@ Resources:
           TABLE_NAME: !Ref DataTable
           TABLE_ARN: !GetAtt DataTable.Arn
           SECRETS_NAMESPACE: !Sub /${EnvironmentTagName}/
+      Events:
+        ApiGET:
+          Type: Api
+          Properties:
+            Path: /
+            Method: GET
+            RestApiId: !Ref Api
     Metadata:
       StackeryName: getDataFromTable
   DataTable:
@@ -42,6 +49,26 @@ Resources:
       TableName: !Sub ${AWS::StackName}-DataTable
     Metadata:
       StackeryName: DataTable
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub
+        - ${ResourceName} From Stack ${StackTagName} Environment ${EnvironmentTagName}
+        - ResourceName: Api
+      StageName: !Ref EnvironmentAPIGatewayStageName
+      DefinitionBody:
+        swagger: '2.0'
+        info: {}
+        paths:
+          /:
+            get:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${getDataFromTable.Arn}/invocations
+              responses: {}
+      EndpointConfiguration: REGIONAL
+      TracingEnabled: true
 Parameters:
   StackTagName:
     Type: String
@@ -49,3 +76,6 @@ Parameters:
   EnvironmentTagName:
     Type: String
     Description: Environment Name (injected by Stackery at deployment time)
+  EnvironmentAPIGatewayStageName:
+    Type: String
+    Description: Environment name used for API Gateway Stage names (injected by Stackery at deployment time)
