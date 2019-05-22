@@ -25,13 +25,10 @@ Resources:
           TABLE_NAME: !Ref DataTable
           TABLE_ARN: !GetAtt DataTable.Arn
           SECRETS_NAMESPACE: !Sub /${EnvironmentTagName}/
-      Events:
-        ApiGET:
-          Type: Api
-          Properties:
-            Path: /
-            Method: GET
-            RestApiId: !Ref Api
+          DB_ID: !Ref AwesomeDB
+          DB_ADDRESS: !GetAtt AwesomeDB.Endpoint.Address
+          DB_PORT: !GetAtt AwesomeDB.Endpoint.Port
+          DB_ARN: !Sub arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${AwesomeDB}
     Metadata:
       StackeryName: getDataFromTable
   DataTable:
@@ -49,26 +46,51 @@ Resources:
       TableName: !Sub ${AWS::StackName}-DataTable
     Metadata:
       StackeryName: DataTable
-  Api:
-    Type: AWS::Serverless::Api
+  AwesomeDB:
+    Type: AWS::RDS::DBCluster
     Properties:
-      Name: !Sub
-        - ${ResourceName} From Stack ${StackTagName} Environment ${EnvironmentTagName}
-        - ResourceName: Api
-      StageName: !Ref EnvironmentAPIGatewayStageName
-      DefinitionBody:
-        swagger: '2.0'
-        info: {}
-        paths:
-          /:
-            get:
-              x-amazon-apigateway-integration:
-                httpMethod: POST
-                type: aws_proxy
-                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${getDataFromTable.Arn}/invocations
-              responses: {}
-      EndpointConfiguration: REGIONAL
-      TracingEnabled: true
+      BackupRetentionPeriod: 1
+      DBSubnetGroupName: !Ref AwesomeDBSubnetGroup
+      Engine: aurora
+      EngineMode: serverless
+      MasterUsername: root
+      MasterUserPassword: ''
+      ScalingConfiguration:
+        AutoPause: false
+        MinCapacity: 2
+        MaxCapacity: 256
+      StorageEncrypted: true
+      VpcSecurityGroupIds:
+        - !Ref AwesomeDBSecurityGroup
+    Metadata:
+      StackeryName: AwesomeDB
+  AwesomeDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Subnets
+        - ResourceName: AwesomeDB
+      SubnetIds: !Ref DefaultVPCSubnets
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Subnets
+            - ResourceName: AwesomeDB
+  AwesomeDBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Database Security Group
+      SecurityGroupIngress:
+        CidrIp: 0.0.0.0/0
+        FromPort: 3306
+        IpProtocol: tcp
+        ToPort: 3306
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Security Group
+            - ResourceName: AwesomeDB
+      VpcId: !Ref DefaultVPCId
 Parameters:
   StackTagName:
     Type: String
@@ -76,6 +98,9 @@ Parameters:
   EnvironmentTagName:
     Type: String
     Description: Environment Name (injected by Stackery at deployment time)
-  EnvironmentAPIGatewayStageName:
-    Type: String
-    Description: Environment name used for API Gateway Stage names (injected by Stackery at deployment time)
+  DefaultVPCId:
+    Type: AWS::EC2::VPC::Id
+    Description: AWS account-specific default VPC ID (injected by Stackery at deployment time)
+  DefaultVPCSubnets:
+    Type: List<AWS::EC2::Subnet::Id>
+    Description: AWS account-specific default VPC subnets (injected by Stackery at deployment time)
