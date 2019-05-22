@@ -54,7 +54,7 @@ Resources:
       Engine: aurora
       EngineMode: serverless
       MasterUsername: root
-      MasterUserPassword: ''
+      MasterUserPassword: '12345678'
       ScalingConfiguration:
         AutoPause: false
         MinCapacity: 2
