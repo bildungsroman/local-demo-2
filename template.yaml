@@ -112,7 +112,7 @@ Resources:
   newFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-newFunction
+      FunctionName: !Sub ${AWS::StackName}-newnodeEightFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: newFunction
@@ -126,6 +126,23 @@ Resources:
         - AWSXrayWriteOnlyAccess
     Metadata:
       StackeryName: newFunction
+  nodeEightFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-nodeEightFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: nodeEightFunction
+      CodeUri: src/nodeEightFunction
+      Handler: index.handler
+      Runtime: nodejs8.10
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+    Metadata:
+      StackeryName: nodeEightFunction
 Parameters:
   StackTagName:
     Type: String
