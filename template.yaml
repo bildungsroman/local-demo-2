@@ -25,10 +25,6 @@ Resources:
           TABLE_NAME: !Ref DataTable
           TABLE_ARN: !GetAtt DataTable.Arn
           SECRETS_NAMESPACE: !Sub /${EnvironmentTagName}/
-          DB_ID: !Ref AwesomeDB
-          DB_ADDRESS: !GetAtt AwesomeDB.Endpoint.Address
-          DB_PORT: !GetAtt AwesomeDB.Endpoint.Port
-          DB_ARN: !Sub arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${AwesomeDB}
     Metadata:
       StackeryName: getDataFromTable
   DataTable:
@@ -46,51 +42,6 @@ Resources:
       TableName: !Sub ${AWS::StackName}-DataTable
     Metadata:
       StackeryName: DataTable
-  AwesomeDB:
-    Type: AWS::RDS::DBCluster
-    Properties:
-      BackupRetentionPeriod: 1
-      DBSubnetGroupName: !Ref AwesomeDBSubnetGroup
-      Engine: aurora
-      EngineMode: serverless
-      MasterUsername: root
-      MasterUserPassword: '12345678'
-      ScalingConfiguration:
-        AutoPause: false
-        MinCapacity: 2
-        MaxCapacity: 256
-      StorageEncrypted: true
-      VpcSecurityGroupIds:
-        - !Ref AwesomeDBSecurityGroup
-    Metadata:
-      StackeryName: AwesomeDB
-  AwesomeDBSubnetGroup:
-    Type: AWS::RDS::DBSubnetGroup
-    Properties:
-      DBSubnetGroupDescription: !Sub
-        - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Subnets
-        - ResourceName: AwesomeDB
-      SubnetIds: !Ref DefaultVPCSubnets
-      Tags:
-        - Key: Name
-          Value: !Sub
-            - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Subnets
-            - ResourceName: AwesomeDB
-  AwesomeDBSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Database Security Group
-      SecurityGroupIngress:
-        CidrIp: 0.0.0.0/0
-        FromPort: 3306
-        IpProtocol: tcp
-        ToPort: 3306
-      Tags:
-        - Key: Name
-          Value: !Sub
-            - Stack ${StackTagName} Environment ${EnvironmentTagName} Database ${ResourceName} VPC Security Group
-            - ResourceName: AwesomeDB
-      VpcId: !Ref DefaultVPCId
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -112,7 +63,7 @@ Resources:
   newFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-newnodeEightFunction
+      FunctionName: !Sub ${AWS::StackName}-newnodeEightnodeTenTest
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: newFunction
@@ -124,12 +75,18 @@ Resources:
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DataTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DataTable
+          TABLE_ARN: !GetAtt DataTable.Arn
     Metadata:
       StackeryName: newFunction
   nodeEightFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-nodeEightFunction
+      FunctionName: !Sub ${AWS::StackName}-nodeEightnodeTenTest
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: nodeEightFunction
@@ -141,8 +98,37 @@ Resources:
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DataTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DataTable
+          TABLE_ARN: !GetAtt DataTable.Arn
     Metadata:
       StackeryName: nodeEightFunction
+  nodeTenTest:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-nodeTenTest
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: nodeTenTest
+      CodeUri: src/nodeTenTest
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DataTable
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref DataTable
+          TABLE_ARN: !GetAtt DataTable.Arn
+    Metadata:
+      StackeryName: nodeTenTest
 Parameters:
   StackTagName:
     Type: String
@@ -150,12 +136,6 @@ Parameters:
   EnvironmentTagName:
     Type: String
     Description: Environment Name (injected by Stackery at deployment time)
-  DefaultVPCId:
-    Type: AWS::EC2::VPC::Id
-    Description: AWS account-specific default VPC ID (injected by Stackery at deployment time)
-  DefaultVPCSubnets:
-    Type: List<AWS::EC2::Subnet::Id>
-    Description: AWS account-specific default VPC subnets (injected by Stackery at deployment time)
   EnvironmentAPIGatewayStageName:
     Type: String
     Description: Environment name used for API Gateway Stage names (injected by Stackery at deployment time)
