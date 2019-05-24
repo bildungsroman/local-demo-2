@@ -60,29 +60,6 @@ Resources:
               responses: {}
       EndpointConfiguration: REGIONAL
       TracingEnabled: true
-  newFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${AWS::StackName}-newnodeEightnodeTenTest
-      Description: !Sub
-        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
-        - ResourceName: newFunction
-      CodeUri: src/newFunction
-      Handler: index.handler
-      Runtime: nodejs10.x
-      MemorySize: 3008
-      Timeout: 30
-      Tracing: Active
-      Policies:
-        - AWSXrayWriteOnlyAccess
-        - DynamoDBCrudPolicy:
-            TableName: !Ref DataTable
-      Environment:
-        Variables:
-          TABLE_NAME: !Ref DataTable
-          TABLE_ARN: !GetAtt DataTable.Arn
-    Metadata:
-      StackeryName: newFunction
   nodeEightFunction:
     Type: AWS::Serverless::Function
     Properties:
