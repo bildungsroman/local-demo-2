@@ -2,5 +2,7 @@
   "private": true,
   "dependencies": {
     "aws-sdk": "~2"
-  }
+  },
+  "name": "get-data-from-table",
+  "version": "1.0.0"
 }
