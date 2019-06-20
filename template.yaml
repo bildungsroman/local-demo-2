@@ -37,7 +37,7 @@ Resources:
         - ResourceName: GoFunction
       CodeUri: src/GoFunction
       Handler: main.Handler
-      Runtime: golang1.x
+      Runtime: go1.x
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
