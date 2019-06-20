@@ -14,12 +14,64 @@ Resources:
         paths:
           /ruby:
             post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RubyFunction.Arn}/invocations
               responses: {}
           /go:
             post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GoFunction.Arn}/invocations
               responses: {}
       EndpointConfiguration: REGIONAL
       TracingEnabled: true
+  RubyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-RubyFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: RubyFunction
+      CodeUri: src/RubyFunction
+      Handler: function.handler
+      Runtime: ruby2.5
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+      Events:
+        ApiPOSTruby:
+          Type: Api
+          Properties:
+            Path: /ruby
+            Method: POST
+            RestApiId: !Ref Api
+  GoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-GoFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: RubyFunction2
+      CodeUri: src/GoFunction
+      Handler: main.Handler
+      Runtime: golang1.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+      Events:
+        ApiPOSTgo:
+          Type: Api
+          Properties:
+            Path: /go
+            Method: POST
+            RestApiId: !Ref Api
 Parameters:
   StackTagName:
     Type: String
