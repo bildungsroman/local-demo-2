@@ -42,7 +42,10 @@ Resources:
         swagger: '2.0'
         info: {}
         paths:
-          /:
+          /ruby:
+            post:
+              responses: {}
+          /go:
             post:
               responses: {}
       EndpointConfiguration: REGIONAL
