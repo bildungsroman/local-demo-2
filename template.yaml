@@ -16,6 +16,13 @@ Resources:
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
+      Events:
+        ApiPOSTruby:
+          Type: Api
+          Properties:
+            Path: /ruby
+            Method: POST
+            RestApiId: !Ref Api
   GoFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -31,6 +38,13 @@ Resources:
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
+      Events:
+        ApiPOSTgo:
+          Type: Api
+          Properties:
+            Path: /go
+            Method: POST
+            RestApiId: !Ref Api
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -44,9 +58,17 @@ Resources:
         paths:
           /ruby:
             post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${RubyFunction.Arn}/invocations
               responses: {}
           /go:
             post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GoFunction.Arn}/invocations
               responses: {}
       EndpointConfiguration: REGIONAL
       TracingEnabled: true
