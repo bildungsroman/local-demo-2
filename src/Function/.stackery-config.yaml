@@ -1,2 +1,4 @@
 function-id: Function
 template-path: ../../template.yaml
+stack-name: local-demo-2
+env-name: demo
