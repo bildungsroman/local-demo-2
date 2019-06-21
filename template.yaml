@@ -1,6 +1,90 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Resources:
+  RubyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-RubyNodePyFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: RubyFunction
+      CodeUri: src/RubyFunction
+      Handler: function.handler
+      Runtime: ruby2.5
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FuncTable
+      Events:
+        ApiPOSTruby:
+          Type: Api
+          Properties:
+            Path: /ruby
+            Method: POST
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FuncTable
+          TABLE_ARN: !GetAtt FuncTable.Arn
+  GoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-GoNodePyFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: RubyFunction2
+      CodeUri: src/GoFunction
+      Handler: main.Handler
+      Runtime: go1.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FuncTable
+      Events:
+        ApiPOSTgo:
+          Type: Api
+          Properties:
+            Path: /go
+            Method: POST
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FuncTable
+          TABLE_ARN: !GetAtt FuncTable.Arn
+  NodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-NodePyFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: NodeFunction
+      CodeUri: src/NodeFunction
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FuncTable
+      Events:
+        ApiPOSTnode:
+          Type: Api
+          Properties:
+            Path: /node
+            Method: POST
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FuncTable
+          TABLE_ARN: !GetAtt FuncTable.Arn
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -12,6 +96,13 @@ Resources:
         swagger: '2.0'
         info: {}
         paths:
+          /node:
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NodeFunction.Arn}/invocations
+              responses: {}
           /ruby:
             post:
               x-amazon-apigateway-integration:
@@ -26,52 +117,56 @@ Resources:
                 type: aws_proxy
                 uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GoFunction.Arn}/invocations
               responses: {}
+          /python:
+            post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PyFunction.Arn}/invocations
+              responses: {}
       EndpointConfiguration: REGIONAL
       TracingEnabled: true
-  GoFunction:
+  PyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-GoFunction
+      FunctionName: !Sub ${AWS::StackName}-PyFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
-        - ResourceName: GoFunction
-      CodeUri: src/GoFunction
-      Handler: main.Handler
-      Runtime: go1.x
+        - ResourceName: PyFunction
+      CodeUri: src/PyFunction
+      Handler: handler.handler
+      Runtime: python3.7
       MemorySize: 3008
       Timeout: 30
       Tracing: Active
       Policies:
         - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FuncTable
       Events:
-        ApiPOSTgo:
+        ApiPOSTpython:
           Type: Api
           Properties:
-            Path: /go
+            Path: /python
             Method: POST
             RestApiId: !Ref Api
-  RubyFunction:
-    Type: AWS::Serverless::Function
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FuncTable
+          TABLE_ARN: !GetAtt FuncTable.Arn
+  FuncTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-RubyFunction
-      Description: !Sub
-        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
-        - ResourceName: GoFunction2
-      CodeUri: src/RubyFunction
-      Handler: function.handler
-      Runtime: ruby2.5
-      MemorySize: 3008
-      Timeout: 30
-      Tracing: Active
-      Policies:
-        - AWSXrayWriteOnlyAccess
-      Events:
-        ApiPOSTruby:
-          Type: Api
-          Properties:
-            Path: /ruby
-            Method: POST
-            RestApiId: !Ref Api
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      TableName: !Sub ${AWS::StackName}-FuncTable
 Parameters:
   StackTagName:
     Type: String
