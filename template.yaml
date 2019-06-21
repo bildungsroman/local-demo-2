@@ -138,7 +138,7 @@ Resources:
           KeyType: HASH
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
-      TableName: !Sub ${AWS::StackName}-FuncTable
+      TableName: !Sub ${AWS::StackName}-FuncTableWTF
   GoFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -167,36 +167,6 @@ Resources:
         Variables:
           TABLE_NAME: !Ref FuncTable
           TABLE_ARN: !GetAtt FuncTable.Arn
-  Function123:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${AWS::StackName}-Function123
-      Description: !Sub
-        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
-        - ResourceName: Function123
-      CodeUri: src/Function123
-      Handler: index.handler
-      Runtime: nodejs10.x
-      MemorySize: 3008
-      Timeout: 30
-      Tracing: Active
-      Policies:
-        - AWSXrayWriteOnlyAccess
-  Function456:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub ${AWS::StackName}-Function456
-      Description: !Sub
-        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
-        - ResourceName: Function1232
-      CodeUri: src/Function456
-      Handler: index.handler
-      Runtime: nodejs10.x
-      MemorySize: 3008
-      Timeout: 30
-      Tracing: Active
-      Policies:
-        - AWSXrayWriteOnlyAccess
 Parameters:
   StackTagName:
     Type: String
