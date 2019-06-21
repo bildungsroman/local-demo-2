@@ -167,6 +167,21 @@ Resources:
         Variables:
           TABLE_NAME: !Ref FuncTable
           TABLE_ARN: !GetAtt FuncTable.Arn
+  FunctionHELLO:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-FunctionHELLO
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: FunctionHELLO
+      CodeUri: src/FunctionHELLO
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
 Parameters:
   StackTagName:
     Type: String
