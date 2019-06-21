@@ -4,7 +4,7 @@ Resources:
   RubyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-RubyFunction123
+      FunctionName: !Sub ${AWS::StackName}-RubyFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: RubyFunction
@@ -32,7 +32,7 @@ Resources:
   NodeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-NodeFunction123
+      FunctionName: !Sub ${AWS::StackName}-NodeFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: NodeFunction
@@ -101,7 +101,7 @@ Resources:
   PyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-PyFunction123
+      FunctionName: !Sub ${AWS::StackName}-PyFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: PyFunction
@@ -142,7 +142,7 @@ Resources:
   GoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-GoFunction123
+      FunctionName: !Sub ${AWS::StackName}-GoFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: GoFunction
