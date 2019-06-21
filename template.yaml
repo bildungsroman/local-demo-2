@@ -4,7 +4,7 @@ Resources:
   RubyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-RubyNodePyFunction
+      FunctionName: !Sub ${AWS::StackName}-RubyNodePyGoFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: RubyFunction
@@ -32,7 +32,7 @@ Resources:
   NodeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-NodePyFunction
+      FunctionName: !Sub ${AWS::StackName}-NodePyGoFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: NodeFunction
@@ -84,6 +84,10 @@ Resources:
               responses: {}
           /go:
             post:
+              x-amazon-apigateway-integration:
+                httpMethod: POST
+                type: aws_proxy
+                uri: !Sub arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GoFunction.Arn}/invocations
               responses: {}
           /python:
             post:
@@ -97,7 +101,7 @@ Resources:
   PyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-PyFunction
+      FunctionName: !Sub ${AWS::StackName}-PyGoFunction
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: PyFunction
@@ -135,6 +139,34 @@ Resources:
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
       TableName: !Sub ${AWS::StackName}-FuncTable
+  GoFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-GoFunction
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: GoFunction
+      CodeUri: src/GoFunction
+      Handler: main.Handler
+      Runtime: go1.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FuncTable
+      Events:
+        ApiPOSTgo:
+          Type: Api
+          Properties:
+            Path: /go
+            Method: POST
+            RestApiId: !Ref Api
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FuncTable
+          TABLE_ARN: !GetAtt FuncTable.Arn
 Parameters:
   StackTagName:
     Type: String
