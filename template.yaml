@@ -4,7 +4,7 @@ Resources:
   RubyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-RubyFunction
+      FunctionName: !Sub ${AWS::StackName}-RubyFunction123
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: RubyFunction
@@ -32,7 +32,7 @@ Resources:
   NodeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-NodeFunction
+      FunctionName: !Sub ${AWS::StackName}-NodeFunction123
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: NodeFunction
@@ -101,7 +101,7 @@ Resources:
   PyFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-PyFunction
+      FunctionName: !Sub ${AWS::StackName}-PyFunction123
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: PyFunction
@@ -142,7 +142,7 @@ Resources:
   GoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${AWS::StackName}-GoFunction
+      FunctionName: !Sub ${AWS::StackName}-GoFunction123
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: GoFunction
@@ -167,6 +167,36 @@ Resources:
         Variables:
           TABLE_NAME: !Ref FuncTable
           TABLE_ARN: !GetAtt FuncTable.Arn
+  Function123:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-Function123
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: Function123
+      CodeUri: src/Function123
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
+  Function456:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-Function456
+      Description: !Sub
+        - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
+        - ResourceName: Function1232
+      CodeUri: src/Function456
+      Handler: index.handler
+      Runtime: nodejs10.x
+      MemorySize: 3008
+      Timeout: 30
+      Tracing: Active
+      Policies:
+        - AWSXrayWriteOnlyAccess
 Parameters:
   StackTagName:
     Type: String
