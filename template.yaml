@@ -4,7 +4,11 @@ Resources:
   RubyFunction:
     Type: AWS::Serverless::Function
     Properties:
+<<<<<<< HEAD
       FunctionName: !Sub ${AWS::StackName}-RubyNodePyFunctionYay
+=======
+      FunctionName: !Sub ${AWS::StackName}-RubyFunction
+>>>>>>> 4a5b536e0f5388af5d0b2bfbfb0cd5c9dc8c1e74
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: RubyFunction
@@ -32,7 +36,11 @@ Resources:
   NodeFunction:
     Type: AWS::Serverless::Function
     Properties:
+<<<<<<< HEAD
       FunctionName: !Sub ${AWS::StackName}-NodePyFunctionYay
+=======
+      FunctionName: !Sub ${AWS::StackName}-NodeFunction
+>>>>>>> 4a5b536e0f5388af5d0b2bfbfb0cd5c9dc8c1e74
       Description: !Sub
         - Stack ${StackTagName} Environment ${EnvironmentTagName} Function ${ResourceName}
         - ResourceName: NodeFunction
@@ -138,7 +146,11 @@ Resources:
           KeyType: HASH
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
+<<<<<<< HEAD
       TableName: !Sub ${AWS::StackName}-FuncTable
+=======
+      TableName: !Sub ${AWS::StackName}-FuncTableWTF
+>>>>>>> 4a5b536e0f5388af5d0b2bfbfb0cd5c9dc8c1e74
   GoFunction:
     Type: AWS::Serverless::Function
     Properties:
